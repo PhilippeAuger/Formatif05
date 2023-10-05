@@ -1,8 +1,10 @@
 package formatif5;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import formatif5.cell.PersonneListCell;
 import formatif5.model.Personne;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.event.ActionEvent;
@@ -10,12 +12,10 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
-import javafx.scene.control.Alert;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.GridPane;
+import javafx.util.Callback;
 
 public class Controller implements Initializable {
 
@@ -31,6 +31,9 @@ public class Controller implements Initializable {
     @FXML
     private TableColumn<Personne, Integer> ageColumn;
 
+    @FXML
+    private ListView<Personne> personneList;
+
     // L'interface Initilizable est une alternative à la méthode @FXML initialize()
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -42,6 +45,7 @@ public class Controller implements Initializable {
     @FXML
     void ajoute(ActionEvent event) {
         FXMLLoader loader = new FXMLLoader(this.getClass().getResource("personne.fxml"));
+        Personne personne;
         try {
             Parent root = loader.load();
 
@@ -53,8 +57,10 @@ public class Controller implements Initializable {
             alerte.getDialogPane().setContent(root);
             alerte.showAndWait();
 
-            tableView.getItems().add(new Personne(Integer.parseInt(ageTextField.getText()), nomTextField.getText(), prenomTextField.getText()));
+            personne = new Personne(Integer.parseInt(ageTextField.getText()), nomTextField.getText(), prenomTextField.getText());
 
+            tableView.getItems().add(personne);
+            personneList.getItems().add(personne);
         } catch (Exception e) {
             System.out.println("erreur de fichier");
         }
@@ -81,8 +87,6 @@ public class Controller implements Initializable {
             prenomTextField.setText(personne.getPrenom());
             TextField ageTextField = (TextField) loader.getNamespace().get("ageTextField");
             ageTextField.setText(Integer.toString(personne.getAge()));
-
-            //root.getChildren()
 
             Alert alerte  = new Alert(Alert.AlertType.CONFIRMATION);
             alerte.getDialogPane().setContent(root);
@@ -118,7 +122,12 @@ public class Controller implements Initializable {
 
     private void createListView() {
         // on règle la fabrique de cellules.
-
+        personneList.setCellFactory(new Callback<ListView<Personne>, ListCell<Personne>>() {
+            @Override
+            public ListCell<Personne> call(ListView<Personne> param) {
+                return new PersonneListCell();
+            }
+        });
 
     }
 
